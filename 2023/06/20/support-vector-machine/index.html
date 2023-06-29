@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon-128x128.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xxyqwq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"flat"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="写在前面这篇文章诞生于机器学习课程无聊的大作业，既然已经为此浪费了不少时间，不妨再多花点时间写一篇文章，借此记录一下实现过程。支持向量机的数学形式简约而直观，但一旦涉及具体实现，各种问题就会接踵而来。在本文中，笔者将首先推导SVM的主要公式，接着基于Platt-SMO算法，从零开始实现支持多种核函数的SVM，然后基于One-Versus-One策略实现多分类，最后在MNIST和CIFAR-10数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【文章】从零开始实现支持向量机">
+<meta property="og:url" content="https://xxyqwq.github.io/2023/06/20/support-vector-machine/index.html">
+<meta property="og:site_name" content="xxyQwQ">
+<meta property="og:description" content="写在前面这篇文章诞生于机器学习课程无聊的大作业，既然已经为此浪费了不少时间，不妨再多花点时间写一篇文章，借此记录一下实现过程。支持向量机的数学形式简约而直观，但一旦涉及具体实现，各种问题就会接踵而来。在本文中，笔者将首先推导SVM的主要公式，接着基于Platt-SMO算法，从零开始实现支持多种核函数的SVM，然后基于One-Versus-One策略实现多分类，最后在MNIST和CIFAR-10数据">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/SVM.jpg">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/separation.png">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/convergence.png">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/linear.png">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/polynomial.png">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/gaussian.png">
+<meta property="og:image" content="https://xxyqwq.github.io/images/support-vector-machine/sigmoid.png">
+<meta property="article:published_time" content="2023-06-20T12:22:29.000Z">
+<meta property="article:modified_time" content="2023-06-20T16:31:31.345Z">
+<meta property="article:author" content="xxyQwQ">
+<meta property="article:tag" content="记录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xxyqwq.github.io/images/support-vector-machine/SVM.jpg">
+
+<link rel="canonical" href="https://xxyqwq.github.io/2023/06/20/support-vector-machine/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【文章】从零开始实现支持向量机 | xxyQwQ</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="xxyQwQ" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">xxyQwQ</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/xxyQwQ" class="github-corner" title="我的 Github" aria-label="我的 Github" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2023/06/20/support-vector-machine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xxyQwQ">
+      <meta itemprop="description" content="xxyQwQ的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxyQwQ">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【文章】从零开始实现支持向量机
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-20 20:22:29" itemprop="dateCreated datePublished" datetime="2023-06-20T20:22:29+08:00">2023-06-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-06-21 00:31:31" itemprop="dateModified" datetime="2023-06-21T00:31:31+08:00">2023-06-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%AB%A0/" itemprop="url" rel="index"><span itemprop="name">文章</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>这篇文章诞生于机器学习课程无聊的大作业，既然已经为此浪费了不少时间，不妨再多花点时间写一篇文章，借此记录一下实现过程。支持向量机的数学形式简约而直观，但一旦涉及具体实现，各种问题就会接踵而来。在本文中，笔者将首先推导SVM的主要公式，接着基于Platt-SMO算法，从零开始实现支持多种核函数的SVM，然后基于One-Versus-One策略实现多分类，最后在MNIST和CIFAR-10数据集上进行性能测试</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><h3 id="基本形式"><a href="#基本形式" class="headerlink" title="基本形式"></a>基本形式</h3><p>给定一个训练集 $\mathcal{D} = \{(\boldsymbol{x}_i, y_i)\}_{i=1}^m$，其中 $\boldsymbol{x}_i \in \mathbb{R}^n$ 是特征向量，$y_i \in \{+1, -1\}$ 是标签。线性SVM期望找到一个超平面 $\boldsymbol{w}^T \boldsymbol{x} + b = 0$，将正样本和负样本分开，其中 $\boldsymbol{w} \in \mathbb{R}^n$ 是法向量，$b \in \mathbb{R}$ 是偏移量</p>
+<p><img src="/images/support-vector-machine/SVM.jpg" style="zoom: 20%;" /></p>
+<p>对于任一样本 $\boldsymbol{x}_i$，其到超平面的距离为</p>
+<script type="math/tex; mode=display">r_i = \frac{|\boldsymbol{w}^T \boldsymbol{x}_i + b|}{\left\|\boldsymbol{w}\right\|}</script><p>假定该超平面能将正负样本完全分开，即对于任一样本 $\boldsymbol{x}_i$有</p>
+<script type="math/tex; mode=display">\left\{\begin{aligned}
+    &\boldsymbol{w}^T \boldsymbol{x}_i + b \geq +1, &y_i = +1 \\
+    &\boldsymbol{w}^T \boldsymbol{x}_i + b \leq -1, &y_i = -1
+\end{aligned}\right.</script><p>注意到有一些样本满足 $\boldsymbol{w}^T \boldsymbol{x}_i + b = \pm 1$，它们被称为支持向量。支持向量到超平面的距离被称为间隔，记为</p>
+<script type="math/tex; mode=display">r = \frac{1}{\left\|\boldsymbol{w}\right\|}</script><p>我们的目标是最大化间隔，即最小化 $\left|\boldsymbol{w}\right|$。因此，优化问题可以表述为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\min_{\boldsymbol{w}, b} \quad \frac{1}{2} \left\|\boldsymbol{w}\right\|^2 \\
+&\text{s.t.} \quad y_i (\boldsymbol{w}^T \boldsymbol{x}_i + b) \geq 1, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>然而，这些样本并不总是线性可分的，因此我们引入Hinge损失函数</p>
+<script type="math/tex; mode=display">\ell_{\text{hinge}}(z) = \max\left\{0, 1 - z\right\}</script><p>于是，优化问题可以表述为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\min_{\boldsymbol{w}, b} \quad \frac{1}{2} \left\|\boldsymbol{w}\right\|^2 + C \sum_{i=1}^m \ell_{\text{hinge}}[y_i (\boldsymbol{w}^T \boldsymbol{x}_i + b)] \\
+&\text{s.t.} \quad \xi_i \geq 0, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>如果我们引入松弛变量 $\xi_i \geq 0$，优化问题可以改写为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\min_{\boldsymbol{w}, b} \quad \frac{1}{2} \left\|\boldsymbol{w}\right\|^2 + C \sum_{i=1}^m \xi_i \\
+&\text{s.t.} \quad y_i (\boldsymbol{w}^T \boldsymbol{x}_i + b) \geq 1 - \xi_i, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>为了构造对偶问题，我们引入拉格朗日乘子 $\alpha_i \geq 0$ 和 $\mu_i \geq 0$，拉格朗日函数定义为</p>
+<script type="math/tex; mode=display">\mathcal{L}(\boldsymbol{w}, b, \boldsymbol{\xi}, \boldsymbol{\alpha}, \boldsymbol{\mu}) = \frac{1}{2} \left\|\boldsymbol{w}\right\|^2 + C \sum_{i=1}^m \xi_i - \sum_{i=1}^m \alpha_i [y_i (\boldsymbol{w}^T \boldsymbol{x}_i + b) - 1 + \xi_i] - \sum_{i=1}^m \mu_i \xi_i</script><p>令 $\mathcal{L}$ 对 $\boldsymbol{w}$，$b$ 和 $\xi_i$ 的偏导数为零，可得</p>
+<script type="math/tex; mode=display">\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \boldsymbol{w}} &= \boldsymbol{w} - \sum_{i=1}^m \alpha_i y_i \boldsymbol{x}_i = 0 \\
+\frac{\partial \mathcal{L}}{\partial b} &= -\sum_{i=1}^m \alpha_i y_i = 0 \\
+\frac{\partial \mathcal{L}}{\partial \xi_i} &= C - \alpha_i - \mu_i = 0
+\end{aligned}</script><p>因此，对偶问题可以表述为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\max_{\boldsymbol{\alpha}} \quad \sum_{i=1}^m \alpha_i - \frac{1}{2} \sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j \boldsymbol{x}_i^T \boldsymbol{x}_j \\
+&\text{s.t.} \quad \sum_{i=1}^m \alpha_i y_i = 0 \\
+&\quad \quad 0 \leq \alpha_i \leq C, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>这是一个二次规划问题，我们可以采用梯度下降或者坐标下降等方法求解。</p>
+<h3 id="核函数与核技巧"><a href="#核函数与核技巧" class="headerlink" title="核函数与核技巧"></a>核函数与核技巧</h3><p>有时候这些样本并不是线性可分的，但是我们可以将它们映射到高维空间，使得它们在高维空间中线性可分。假定映射函数为 $\phi$，则样本 $\boldsymbol{x}_i$ 被映射到 $\phi(\boldsymbol{x}_i)$。我们可以将对偶问题改写为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\max_{\boldsymbol{\alpha}} \quad \sum_{i=1}^m \alpha_i - \frac{1}{2} \sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j \phi(\boldsymbol{x}_i)^T \phi(\boldsymbol{x}_j) \\
+&\text{s.t.} \quad \sum_{i=1}^m \alpha_i y_i = 0 \\
+&\quad \quad 0 \leq \alpha_i \leq C, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>有趣的是，我们并不需要显式地计算 $\phi(\boldsymbol{x}_i)$，而是通过核函数 $K(\boldsymbol{x}_i, \boldsymbol{x}_j) = \phi(\boldsymbol{x}_i)^T \phi(\boldsymbol{x}_j)$ 来计算内积，因此对偶问题可以改写为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+&\max_{\boldsymbol{\alpha}} \quad \sum_{i=1}^m \alpha_i - \frac{1}{2} \sum_{i=1}^m \sum_{j=1}^m \alpha_i \alpha_j y_i y_j K(\boldsymbol{x}_i, \boldsymbol{x}_j) \\
+&\text{s.t.} \quad \sum_{i=1}^m \alpha_i y_i = 0 \\
+&\quad \quad 0 \leq \alpha_i \leq C, \quad i = 1, 2, \dots, m
+\end{aligned}</script><p>这种方法也称为核技巧（Kernel Trick），下面我们给出几种常用的核函数</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">核函数</th>
+<th style="text-align:center">$\kappa(\boldsymbol{x}_i, \boldsymbol{x}_j)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">线性核</td>
+<td style="text-align:center">$\boldsymbol{x}_i^T \boldsymbol{x}_j$</td>
+</tr>
+<tr>
+<td style="text-align:center">多项式核</td>
+<td style="text-align:center">$(\gamma \boldsymbol{x}_i^T \boldsymbol{x}_j + r)^d$</td>
+</tr>
+<tr>
+<td style="text-align:center">高斯核</td>
+<td style="text-align:center">$\exp(-\gamma \vert\boldsymbol{x}_i - \boldsymbol{x}_j\vert^2)$</td>
+</tr>
+<tr>
+<td style="text-align:center">Sigmoid核</td>
+<td style="text-align:center">$\tanh(\gamma \boldsymbol{x}_i^T \boldsymbol{x}_j + r)$</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="Platt-SMO算法"><a href="#Platt-SMO算法" class="headerlink" title="Platt-SMO算法"></a>Platt-SMO算法</h3><p>Platt-SMO算法来源于坐标下降法，每次只尝试优化一个变量。由于对偶问题中存在约束，我们每次需要优化两个变量。假设我们选择 $\alpha_1$ 和 $\alpha_2$ 来优化，固定其他变量，优化问题可以表述为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    \max_{\alpha_1, \alpha_2} \quad &\alpha_1 + \alpha_2 - \alpha_1 \alpha_2 y_1 y_2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) \\
+    &- \frac{1}{2} \alpha_1^2 y_1^2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) - \frac{1}{2} \alpha_2^2 y_2^2 \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2) \\
+    &- \alpha_1 y_1 \sum_{i=3}^m \alpha_i y_i \kappa(\boldsymbol{x}_1, \boldsymbol{x}_i) - \alpha_2 y_2 \sum_{i=3}^m \alpha_i y_i \kappa(\boldsymbol{x}_2, \boldsymbol{x}_i) \\
+    \text{s.t.} \quad &\alpha_1 y_1 + \alpha_2 y_2 = -\sum_{i=3}^m \alpha_i y_i = \zeta \\
+    &0 \leq \alpha_1 \leq C, \quad 0 \leq \alpha_2 \leq C
+\end{aligned}</script><p>其中 $\zeta$ 是一个常数，我们可以将 $\alpha_1$ 表示为</p>
+<script type="math/tex; mode=display">\alpha_1 = \zeta y_1 - \alpha_2 y_1 y_2</script><p>决策函数可以表示为</p>
+<script type="math/tex; mode=display">f(\boldsymbol{x})=\sum_{i=1}^m \alpha_i y_i \kappa(\boldsymbol{x}_i, \boldsymbol{x}) + b</script><p>令 $E_i=f(\boldsymbol{x}_i)-y_i$ 表示预测值与真实值之间的误差。定义辅助变量 $v_1$ 和 $v_2$ 为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    v_1&=\sum \limits_{i=3}^m \alpha_i y_i \kappa(\boldsymbol{x}_1, \boldsymbol{x}_i) \\
+    &=f(\boldsymbol{x}_1) - b - \alpha_1 y_1 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) - \alpha_2 y_2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) \\
+    v_2&=\sum \limits_{i=3}^m \alpha_i y_i \kappa(\boldsymbol{x}_2, \boldsymbol{x}_i) \\
+    &=f(\boldsymbol{x}_2) - b - \alpha_1 y_1 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) - \alpha_2 y_2 \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2)
+\end{aligned}</script><p>于是目标函数可以写成</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    \mathcal{L}(\alpha_2) &= -\alpha_2 (\zeta - \alpha_2 y_2) y_2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) \\
+    &- \frac{1}{2} (\zeta - \alpha_2 y_2)^2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) - \frac{1}{2} \alpha_2^2 \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2) \\
+    &-(\zeta - \alpha_2 y_2) v_1 - \alpha_2 y_2 v_2 + (1 - y_1 y_2) \alpha_2
+\end{aligned}</script><p>令 $\mathcal{L}$ 对 $\alpha_2$ 的偏导数为零，可得</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    \frac{\partial \mathcal{L}}{\partial \alpha_2} &= -(\kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) + \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2) - 2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2)) \alpha_2 \\
+    &+ y_2 \zeta (\kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) - \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2)) \\
+    &+ (v_1 - v_2) y_2 - y_1 y_2 + y_2^2 = 0
+\end{aligned}</script><p>令 $\eta = \kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) + \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2) - 2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2)$，注意到</p>
+<script type="math/tex; mode=display">v_1 - v_2 = f(\boldsymbol{x}_1) - f(\boldsymbol{x}_2) + \alpha_2 y_2 \eta - \zeta (\kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) - \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2))</script><p>于是有</p>
+<script type="math/tex; mode=display">\frac{\partial \mathcal{L}}{\partial \alpha_2} = -\eta \alpha_2^* + \eta \alpha_2 + y_2 (E_1 - E_2) = 0</script><p>因此</p>
+<script type="math/tex; mode=display">\alpha_2^* = \alpha_2 + \frac{y_2 (E_1 - E_2)}{\eta}</script><p>由于存在约束条件 $0 \leq \alpha_1,\alpha_2 \leq C$，因此需要对 $\alpha_2^*$ 进行修剪</p>
+<script type="math/tex; mode=display">\alpha'_2 = \left\{ \begin{aligned}
+    &L, &\alpha_2^* < L \\
+    &\alpha_2^*, &L \leq \alpha_2^* \leq H \\
+    &H, &\alpha_2^* > H \\
+\end{aligned} \right.</script><p>其中</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    L &= \left\{ \begin{aligned}
+        &\max \{0, \alpha_2 + \alpha_1 - C\}, &y_1=y_2 \\
+        &\max \{0, \alpha_2 - \alpha_1\}, &y_1 \neq y_2 \\
+    \end{aligned} \right. \\
+    H &= \left\{ \begin{aligned}
+        &\min \{C, \alpha_2 + \alpha_1\}, &y_1=y_2 \\
+        &\min \{C, C + \alpha_2 - \alpha_1\}, &y_1 \neq y_2 \\
+    \end{aligned} \right.
+\end{aligned}</script><p>于是 $\alpha_1$ 可以通过 $\alpha_2$ 来计算</p>
+<script type="math/tex; mode=display">\alpha'_1 = \alpha_1 + y_1 y_2 (\alpha_2 - \alpha'_2)</script><p>如果 $0 &lt; \alpha_i &lt; C$，则 $\boldsymbol{x}_i$ 是支持向量，辅助变量 $b_1$ 和 $b_2$ 定义为</p>
+<script type="math/tex; mode=display">\begin{aligned}
+    b_1 &= b - E_1 - y_1 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_1) (\alpha'_1 - \alpha_1) - y_2 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) (\alpha'_2 - \alpha_2) \\
+    b_2 &= b - E_2 - y_1 \kappa(\boldsymbol{x}_1, \boldsymbol{x}_2) (\alpha'_1 - \alpha_1) - y_2 \kappa(\boldsymbol{x}_2, \boldsymbol{x}_2) (\alpha'_2 - \alpha_2)
+\end{aligned}</script><p>因此，偏移量 $b$ 的更新规则为</p>
+<script type="math/tex; mode=display">b = \left\{ \begin{aligned}
+    &b_1, &0 < \alpha'_1 < C \\
+    &b_2, &0 < \alpha'_2 < C \\
+    &\frac{b_1 + b_2}{2}, &\text{otherwise}
+\end{aligned} \right.</script><p>现在我们已经得到了单次迭代中所有参数的更新公式，我们只需要反复地选择一对 $\alpha_i$ 和 $\alpha_j$ 进行更新，直到收敛为止</p>
+<h2 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h2><h3 id="核函数"><a href="#核函数" class="headerlink" title="核函数"></a>核函数</h3><p>我们对上述四种核函数进行实现，这里将核函数封装成类，通过实现<code>__call__</code>方法，使其实例可以像函数一样被调用</p>
+<ol>
+<li><p>线性核</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LinearKernel</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.name = <span class="string">&#x27;linear&#x27;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        <span class="keyword">return</span> X @ y.T</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>多项式核</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PolynomialKernel</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, gamma=<span class="number">1.0</span>, degree=<span class="number">3</span></span>):</span><br><span class="line">        self.name = <span class="string">&#x27;polynomial&#x27;</span></span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.degree = degree</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        <span class="keyword">return</span> np.power(self.gamma * (X @ y.T) + <span class="number">1</span>, self.degree)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>高斯核</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GaussianKernel</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, gamma=<span class="number">1.0</span></span>):</span><br><span class="line">        self.name = <span class="string">&#x27;gaussian&#x27;</span></span><br><span class="line">        self.gamma = gamma</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        <span class="keyword">return</span> np.exp(-self.gamma * np.<span class="built_in">sum</span>(np.square(X - y), axis=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Sigmod核</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SigmoidKernel</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, gamma=<span class="number">1.0</span>, bias=<span class="number">0.0</span></span>):</span><br><span class="line">        self.name = <span class="string">&#x27;sigmoid&#x27;</span></span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.bias = bias</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        <span class="keyword">return</span> np.tanh(self.gamma * (X @ y.T) + self.bias)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>另外，我们定义一个工具函数，方便核函数的创建</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">CreateKernel</span>(<span class="params">entry</span>):</span><br><span class="line">    <span class="keyword">if</span> entry[<span class="string">&#x27;name&#x27;</span>] == <span class="string">&#x27;linear&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> LinearKernel()</span><br><span class="line">    <span class="keyword">elif</span> entry[<span class="string">&#x27;name&#x27;</span>] == <span class="string">&#x27;polynomial&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> PolynomialKernel(entry[<span class="string">&#x27;gamma&#x27;</span>], entry[<span class="string">&#x27;degree&#x27;</span>])</span><br><span class="line">    <span class="keyword">elif</span> entry[<span class="string">&#x27;name&#x27;</span>] == <span class="string">&#x27;gaussian&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> GaussianKernel(entry[<span class="string">&#x27;gamma&#x27;</span>])</span><br><span class="line">    <span class="keyword">elif</span> entry[<span class="string">&#x27;name&#x27;</span>] == <span class="string">&#x27;sigmoid&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> SigmoidKernel(entry[<span class="string">&#x27;gamma&#x27;</span>], entry[<span class="string">&#x27;bias&#x27;</span>])</span><br><span class="line">    <span class="keyword">raise</span> AttributeError(<span class="string">&#x27;invalid kernel&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="支持向量机"><a href="#支持向量机" class="headerlink" title="支持向量机"></a>支持向量机</h3><p>参考<code>scikit-learn</code>的封装，我们定义一个类，提供<code>fit</code>和<code>predict</code>两种方法，参数包括最大迭代次数、惩罚系数、误差精度和核函数类型，利用私有函数实现 $\alpha_i$ 和 $\alpha_j$ 的选择和单步更新，对于线性核，我们提供<code>weight</code>属性，用于获取线性核的分类超平面参数，除了一些简化以外，代码基本按照Platt-SMO算法进行实现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SupportVectorMachine</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, iteration=<span class="number">100</span>, penalty=<span class="number">1.0</span>, epsilon=<span class="number">1e-6</span>, kernel=<span class="literal">None</span></span>):</span><br><span class="line">        self.iteration = iteration</span><br><span class="line">        self.penalty = penalty</span><br><span class="line">        self.epsilon = epsilon</span><br><span class="line">        <span class="keyword">if</span> kernel <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            kernel = &#123;<span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;linear&#x27;</span>&#125;</span><br><span class="line">        self.kernel = CreateKernel(kernel)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__compute_w</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> (self.a * self.y) @ self.X</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__compute_e</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> (self.a * self.y) @ self.K[:, i] + self.b - self.y[i]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__select_j</span>(<span class="params">self, i</span>):</span><br><span class="line">        j = np.random.randint(<span class="number">1</span>, self.m)</span><br><span class="line">        <span class="keyword">return</span> j <span class="keyword">if</span> j &gt; i <span class="keyword">else</span> j - <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__step_forward</span>(<span class="params">self, i</span>):</span><br><span class="line">        e_i = self.__compute_e(i)</span><br><span class="line">        <span class="keyword">if</span> ((self.a[i] &gt; <span class="number">0</span>) <span class="keyword">and</span> (e_i * self.y[i] &gt; self.epsilon)) <span class="keyword">or</span> ((self.a[i] &lt; self.penalty) <span class="keyword">and</span> (e_i * self.y[i] &lt; -self.epsilon)):</span><br><span class="line">            j = self.__select_j(i)</span><br><span class="line">            e_j = self.__compute_e(j)</span><br><span class="line">            a_i, a_j = np.copy(self.a[i]), np.copy(self.a[j])</span><br><span class="line">            <span class="keyword">if</span> self.y[i] == self.y[j]:</span><br><span class="line">                L = <span class="built_in">max</span>(<span class="number">0</span>, a_i + a_j - self.penalty)</span><br><span class="line">                H = <span class="built_in">min</span>(self.penalty, a_i + a_j)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                L = <span class="built_in">max</span>(<span class="number">0</span>, a_j - a_i)</span><br><span class="line">                H = <span class="built_in">min</span>(self.penalty, self.penalty + a_j - a_i)</span><br><span class="line">            <span class="keyword">if</span> L == H:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">            d = <span class="number">2</span> * self.K[i, j] - self.K[i, i] - self.K[j, j]</span><br><span class="line">            <span class="keyword">if</span> d &gt;= <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">            self.a[j] = np.clip(a_j - self.y[j] * (e_i - e_j) / d, L, H)</span><br><span class="line">            <span class="keyword">if</span> np.<span class="built_in">abs</span>(self.a[j] - a_j) &lt; self.epsilon:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">            self.a[i] = a_i + self.y[i] * self.y[j] * (a_j - self.a[j])</span><br><span class="line">            b_i = self.b - e_i - self.y[i] * self.K[i, i] * (self.a[i] - a_i) - self.y[j] * self.K[j, i] * (self.a[j] - a_j)</span><br><span class="line">            b_j = self.b - e_j - self.y[i] * self.K[i, j] * (self.a[i] - a_i) - self.y[j] * self.K[j, j] * (self.a[j] - a_j)</span><br><span class="line">            <span class="keyword">if</span> <span class="number">0</span> &lt; self.a[i] &lt; self.penalty:</span><br><span class="line">                self.b = b_i</span><br><span class="line">            <span class="keyword">elif</span> <span class="number">0</span> &lt; self.a[j] &lt; self.penalty:</span><br><span class="line">                self.b = b_j</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                self.b = (b_i + b_j) / <span class="number">2</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">setup</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        self.X, self.y = X, y</span><br><span class="line">        self.m, self.n = X.shape</span><br><span class="line">        self.b = <span class="number">0.0</span></span><br><span class="line">        self.a = np.zeros(self.m)</span><br><span class="line">        self.K = np.zeros((self.m, self.m))</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.m):</span><br><span class="line">            self.K[:, i] = self.kernel(X, X[i, :])</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fit</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        self.setup(X, y)</span><br><span class="line">        entire = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(self.iteration):</span><br><span class="line">            change = <span class="number">0</span></span><br><span class="line">            <span class="keyword">if</span> entire:</span><br><span class="line">                <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.m):</span><br><span class="line">                    change += self.__step_forward(i)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                index = np.nonzero((<span class="number">0</span> &lt; self.a) * (self.a &lt; self.penalty))[<span class="number">0</span>]</span><br><span class="line">                <span class="keyword">for</span> i <span class="keyword">in</span> index:</span><br><span class="line">                    change += self.__step_forward(i)</span><br><span class="line">            <span class="keyword">if</span> entire:</span><br><span class="line">                entire = <span class="literal">False</span></span><br><span class="line">            <span class="keyword">elif</span> change == <span class="number">0</span>:</span><br><span class="line">                entire = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, X</span>):</span><br><span class="line">        m = X.shape[<span class="number">0</span>]</span><br><span class="line">        y = np.zeros(m)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(m):</span><br><span class="line">            y[i] = np.sign((self.a * self.y) @ self.kernel(self.X, X[i, :]) + self.b)</span><br><span class="line">        <span class="keyword">return</span> y</span><br><span class="line">    </span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">weight</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">if</span> self.kernel.name != <span class="string">&#x27;linear&#x27;</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(<span class="string">&#x27;non-linear kernel&#x27;</span>)</span><br><span class="line">        <span class="keyword">return</span> self.__compute_w(), self.b</span><br></pre></td></tr></table></figure>
+<h3 id="多分类"><a href="#多分类" class="headerlink" title="多分类"></a>多分类</h3><p>基于One-Versus-One策略，我们构造 $C_k^2$ 个SVM，其中 $k$ 为类别数，训练每个分类器时，选取相应类别的样本作为训练集，并将标签映射到 $-1$ 和 $1$，在预测时，用每个分类器的预测结果进行投票，从而得到最终结果</p>
+<p>我们采用与支持向量机完全相同的封装，提供<code>fit</code>和<code>predict</code>两种方法，使该类成为通用的分类模型</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SupportVectorClassifier</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, iteration=<span class="number">100</span>, penalty=<span class="number">1.0</span>, epsilon=<span class="number">1e-6</span>, kernel=<span class="literal">None</span></span>):</span><br><span class="line">        self.iteration = iteration</span><br><span class="line">        self.penalty = penalty</span><br><span class="line">        self.epsilon = epsilon</span><br><span class="line">        self.kernel = kernel</span><br><span class="line">        self.classifier = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__build_model</span>(<span class="params">self, y</span>):</span><br><span class="line">        self.label = np.unique(y)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(self.label)):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i+<span class="number">1</span>, <span class="built_in">len</span>(self.label)):</span><br><span class="line">                model = SupportVectorMachine(self.iteration, self.penalty, self.epsilon, self.kernel)</span><br><span class="line">                self.classifier.append((i, j, model))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fit</span>(<span class="params">self, X, y</span>):</span><br><span class="line">        self.__build_model(y)</span><br><span class="line">        <span class="keyword">for</span> i, j, model <span class="keyword">in</span> tqdm(self.classifier):</span><br><span class="line">            index = np.where((y == self.label[i]) | (y == self.label[j]))[<span class="number">0</span>]</span><br><span class="line">            X_ij, y_ij = X[index], np.where(y[index] == self.label[i], -<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">            model.fit(X_ij, y_ij)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, X</span>):</span><br><span class="line">        vote = np.zeros((X.shape[<span class="number">0</span>], <span class="built_in">len</span>(self.label)))</span><br><span class="line">        <span class="keyword">for</span> i, j, model <span class="keyword">in</span> tqdm(self.classifier):</span><br><span class="line">            y = model.predict(X)</span><br><span class="line">            vote[np.where(y == -<span class="number">1</span>)[<span class="number">0</span>], i] += <span class="number">1</span></span><br><span class="line">            vote[np.where(y == <span class="number">1</span>)[<span class="number">0</span>], j] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> self.label[np.argmax(vote, axis=<span class="number">1</span>)]</span><br></pre></td></tr></table></figure>
+<h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><p>首先，我们在二维平面上构造两组简单的正态分布数据，用于可视化支持向量机的分类效果，首先构造数据并训练模型</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">X = np.concatenate((np.random.randn(<span class="number">500</span>, <span class="number">2</span>) - <span class="number">2</span>, np.random.randn(<span class="number">500</span>, <span class="number">2</span>) + <span class="number">2</span>))</span><br><span class="line">y = np.concatenate((np.ones(<span class="number">500</span>), -np.ones(<span class="number">500</span>)))</span><br><span class="line">C = SupportVectorMachine(iteration=<span class="number">100</span>)</span><br><span class="line">C.fit(X, y)</span><br><span class="line">w, b = C.weight</span><br><span class="line">u = np.linspace(-<span class="number">3</span>, <span class="number">3</span>, <span class="number">100</span>)</span><br><span class="line">v = (-b - w[<span class="number">0</span>] * u) / w[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+<p>然后根据模型参数绘制分类效果<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(X[:<span class="number">500</span>, <span class="number">0</span>], X[:<span class="number">500</span>, <span class="number">1</span>], label=<span class="string">&#x27;Positive&#x27;</span>)</span><br><span class="line">plt.scatter(X[<span class="number">500</span>:, <span class="number">0</span>], X[<span class="number">500</span>:, <span class="number">1</span>], label=<span class="string">&#x27;Negative&#x27;</span>)</span><br><span class="line">plt.plot(u, v, label=<span class="string">&#x27;Separation&#x27;</span>, c=<span class="string">&#x27;g&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;$x$&#x27;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;$y$&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Separation Sample&#x27;</span>)</span><br><span class="line">plt.grid()</span><br><span class="line">plt.legend()</span><br><span class="line">plt.tight_layout()</span><br><span class="line">plt.savefig(<span class="string">&#x27;./figure/separation.png&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，我们实现的SVM可以很好地将两组数据分开</p>
+<p><img src="/images/support-vector-machine/separation.png" style="zoom: 75%;" /></p>
+<p>为了在MNIST和CIFAR-10数据集上测试性能，需要对数据进行预处理，这里我们将图像展开为向量，并将像素值归一化到 $[0, 1]$ 区间，对于MNIST数据集我们仅保留 $5000$ 个训练样本和 $1000$ 个测试样本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">MNIST</span>(<span class="params">path, group=<span class="string">&#x27;train&#x27;</span></span>):</span><br><span class="line">    <span class="keyword">if</span> group == <span class="string">&#x27;train&#x27;</span>:</span><br><span class="line">        <span class="keyword">with</span> gzip.<span class="built_in">open</span>(os.path.join(path, <span class="string">&#x27;train-images-idx3-ubyte.gz&#x27;</span>), <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            image = np.frombuffer(file.read(), np.uint8, offset=<span class="number">16</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>) / <span class="number">255.0</span></span><br><span class="line">        <span class="keyword">with</span> gzip.<span class="built_in">open</span>(os.path.join(path, <span class="string">&#x27;train-labels-idx1-ubyte.gz&#x27;</span>), <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            label = np.frombuffer(file.read(), np.uint8, offset=<span class="number">8</span>)</span><br><span class="line">    <span class="keyword">elif</span> group == <span class="string">&#x27;test&#x27;</span>:</span><br><span class="line">        <span class="keyword">with</span> gzip.<span class="built_in">open</span>(os.path.join(path, <span class="string">&#x27;t10k-images-idx3-ubyte.gz&#x27;</span>), <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            image = np.frombuffer(file.read(), np.uint8, offset=<span class="number">16</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>) / <span class="number">255.0</span></span><br><span class="line">        <span class="keyword">with</span> gzip.<span class="built_in">open</span>(os.path.join(path, <span class="string">&#x27;t10k-labels-idx1-ubyte.gz&#x27;</span>), <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            label = np.frombuffer(file.read(), np.uint8, offset=<span class="number">8</span>)</span><br><span class="line">    remain = <span class="number">500</span> <span class="keyword">if</span> group == <span class="string">&#x27;train&#x27;</span> <span class="keyword">else</span> <span class="number">100</span></span><br><span class="line">    image_list, label_list = [], []</span><br><span class="line">    <span class="keyword">for</span> value <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        index = np.where(label == value)[<span class="number">0</span>][:remain]</span><br><span class="line">        image_list.append(image[index])</span><br><span class="line">        label_list.append(label[index])</span><br><span class="line">    image, label = np.concatenate(image_list), np.concatenate(label_list)</span><br><span class="line">    index = np.random.permutation(<span class="built_in">len</span>(label))</span><br><span class="line">    <span class="keyword">return</span> image[index], label[index]</span><br></pre></td></tr></table></figure>
+<p>对于CIFAR10数据集，我们做同样的处理<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">CIFAR10</span>(<span class="params">path, group=<span class="string">&#x27;train&#x27;</span></span>):</span><br><span class="line">    <span class="keyword">if</span> group == <span class="string">&#x27;train&#x27;</span>:</span><br><span class="line">        image_list, label_list = [], []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">6</span>):</span><br><span class="line">            filename = os.path.join(path, <span class="string">&#x27;data_batch_&#123;&#125;&#x27;</span>.<span class="built_in">format</span>(i))</span><br><span class="line">            <span class="keyword">with</span> <span class="built_in">open</span>(filename, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">                data = pickle.load(file, encoding=<span class="string">&#x27;bytes&#x27;</span>)</span><br><span class="line">            image_list.append(np.array(data[<span class="string">b&#x27;data&#x27;</span>], dtype=np.float32).reshape(-<span class="number">1</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>) / <span class="number">255.0</span>)</span><br><span class="line">            label_list.append(np.array(data[<span class="string">b&#x27;labels&#x27;</span>], dtype=np.int32))</span><br><span class="line">        image, label = np.concatenate(image_list), np.concatenate(label_list)</span><br><span class="line">    <span class="keyword">elif</span> group == <span class="string">&#x27;test&#x27;</span>:</span><br><span class="line">        filename = os.path.join(path, <span class="string">&#x27;test_batch&#x27;</span>)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(filename, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> file:</span><br><span class="line">            data = pickle.load(file, encoding=<span class="string">&#x27;bytes&#x27;</span>)</span><br><span class="line">        image = np.array(data[<span class="string">b&#x27;data&#x27;</span>], dtype=np.float32).reshape(-<span class="number">1</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>) / <span class="number">255.0</span></span><br><span class="line">        label = np.array(data[<span class="string">b&#x27;labels&#x27;</span>], dtype=np.int32)</span><br><span class="line">    remain = <span class="number">500</span> <span class="keyword">if</span> group == <span class="string">&#x27;train&#x27;</span> <span class="keyword">else</span> <span class="number">100</span></span><br><span class="line">    image_list, label_list = [], []</span><br><span class="line">    <span class="keyword">for</span> value <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        index = np.where(label == value)[<span class="number">0</span>][:remain]</span><br><span class="line">        image_list.append(image[index])</span><br><span class="line">        label_list.append(label[index])</span><br><span class="line">    image, label = np.concatenate(image_list), np.concatenate(label_list)</span><br><span class="line">    index = np.random.permutation(<span class="built_in">len</span>(label))</span><br><span class="line">    <span class="keyword">return</span> image[index], label[index]</span><br></pre></td></tr></table></figure></p>
+<p>由于CIFAR10数据集较为困难，我们考虑利用CV方法进行特征提取，这里我们使用HOG特征提高分类效果，首先将彩色图像转换为灰度图像</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">RGB2Gray</span>(<span class="params">image</span>):</span><br><span class="line">    image = <span class="number">0.299</span> * image[<span class="number">0</span>] + <span class="number">0.587</span> * image[<span class="number">1</span>] + <span class="number">0.114</span> * image[<span class="number">2</span>]</span><br><span class="line">    <span class="keyword">return</span> image.reshape(<span class="number">1</span>, *image.shape)</span><br></pre></td></tr></table></figure>
+<p>然后实现一个简单的HOG特征提取函数，这里我们没有实现区块重叠，对该函数进行改进应该可以进一步提高分类效果</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">HOG</span>(<span class="params">image, block=<span class="number">4</span>, partition=<span class="number">8</span></span>):</span><br><span class="line">    image = RGB2Gray(image).squeeze(axis=<span class="number">0</span>)</span><br><span class="line">    height, width = image.shape</span><br><span class="line">    gradient = np.zeros((<span class="number">2</span>, height, width), dtype=np.float32)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, height-<span class="number">1</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, width-<span class="number">1</span>):</span><br><span class="line">            delta_x = image[i, j-<span class="number">1</span>] - image[i, j+<span class="number">1</span>]</span><br><span class="line">            delta_y = image[i+<span class="number">1</span>, j] - image[i-<span class="number">1</span>, j]</span><br><span class="line">            gradient[<span class="number">0</span>, i, j] = np.sqrt(delta_x ** <span class="number">2</span> + delta_y ** <span class="number">2</span>)</span><br><span class="line">            gradient[<span class="number">1</span>, i, j] = np.degrees(np.arctan2(delta_y, delta_x))</span><br><span class="line">            <span class="keyword">if</span> gradient[<span class="number">1</span>, i, j] &lt; <span class="number">0</span>:</span><br><span class="line">                gradient[<span class="number">1</span>, i, j] += <span class="number">180</span></span><br><span class="line">    unit = <span class="number">360</span> / partition</span><br><span class="line">    vertical, horizontal = height // block, width // block</span><br><span class="line">    feature = np.zeros((vertical, horizontal, partition), dtype=np.float32)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(vertical):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(horizontal):</span><br><span class="line">            <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(block):</span><br><span class="line">                <span class="keyword">for</span> l <span class="keyword">in</span> <span class="built_in">range</span>(block):</span><br><span class="line">                    rho = gradient[<span class="number">0</span>, i*block+k, j*block+l]</span><br><span class="line">                    theta = gradient[<span class="number">1</span>, i*block+k, j*block+l]</span><br><span class="line">                    index = <span class="built_in">int</span>(theta // unit)</span><br><span class="line">                    feature[i, j, index] += rho</span><br><span class="line">            feature[i, j] /= np.linalg.norm(feature[i, j]) + <span class="number">1e-6</span></span><br><span class="line">    <span class="keyword">return</span> feature.reshape(-<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>基于这些工具函数，我们可以优雅地完成图像分类任务，对于MNIST数据集，一个基于线性核的分类示例如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">X_train, y_train = MNIST(<span class="string">&#x27;./dataset/mnist_data/&#x27;</span>, group=<span class="string">&#x27;train&#x27;</span>)</span><br><span class="line">X_test, y_test = MNIST(<span class="string">&#x27;./dataset/mnist_data/&#x27;</span>, group=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">X_train, X_test = X_train.reshape(-<span class="number">1</span>, <span class="number">28</span>*<span class="number">28</span>), X_test.reshape(-<span class="number">1</span>, <span class="number">28</span>*<span class="number">28</span>)</span><br><span class="line"></span><br><span class="line">model = SupportVectorClassifier(iteration=<span class="number">100</span>, penalty=<span class="number">0.05</span>)</span><br><span class="line">model.fit(X_train, y_train)</span><br><span class="line">p_train, p_test = model.predict(X_train), model.predict(X_test)</span><br><span class="line"></span><br><span class="line">r_train, r_test = ComputeAccuracy(p_train, y_train), ComputeAccuracy(p_test, y_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Kernel: Linear, Train: &#123;:.2%&#125;, Test: &#123;:.2%&#125;&#x27;</span>.<span class="built_in">format</span>(r_train, r_test))</span><br></pre></td></tr></table></figure>
+<p>对于CIFAR10数据集，一个基于HOG特征和高斯核的分类示例如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">X_train, y_train = CIFAR10(<span class="string">&#x27;./dataset/cifar-10-batches-py/&#x27;</span>, group=<span class="string">&#x27;train&#x27;</span>)</span><br><span class="line">X_test, y_test = CIFAR10(<span class="string">&#x27;./dataset/cifar-10-batches-py/&#x27;</span>, group=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">X_train, X_test = BatchHOG(X_train, partition=<span class="number">16</span>), BatchHOG(X_test, partition=<span class="number">16</span>)</span><br><span class="line"></span><br><span class="line">kernel = &#123;<span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;gaussian&#x27;</span>, <span class="string">&#x27;gamma&#x27;</span>: <span class="number">0.03</span>&#125;</span><br><span class="line">model = SupportVectorClassifier(iteration=<span class="number">100</span>, kernel=kernel)</span><br><span class="line">model.fit(X_train, y_train)</span><br><span class="line">p_train, p_test = model.predict(X_train), model.predict(X_test)</span><br><span class="line"></span><br><span class="line">r_train, r_test = ComputeAccuracy(p_train, y_train), ComputeAccuracy(p_test, y_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Kernel: Gaussian, Train: &#123;:.2%&#125;, Test: &#123;:.2%&#125;&#x27;</span>.<span class="built_in">format</span>(r_train, r_test))</span><br></pre></td></tr></table></figure>
+<p>经过测试，我们实现的SVM分类器在MNIST和CIFAR10数据集上的分类精度如下表所示</p>
+<table style="text-align:center">
+    <thead>
+        <tr>
+            <th>核函数</th>
+            <th>组别</th>
+            <th>MNIST</th>
+            <th>CIFAR10</th>
+            <th>CIFAR10-HOG</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="2">线性核</td>
+            <td>训练集</td>
+            <td>96.96%</td>
+            <td>76.14%</td>
+            <td>77.58%</td>
+        </tr>
+        <tr>
+            <td>测试集</td>
+            <td>90.70%</td>
+            <td>33.60%</td>
+            <td>39.50%</td>
+        </tr>
+        <tr>
+            <td rowspan="2">多项式核</td>
+            <td>训练集</td>
+            <td>100.00%</td>
+            <td>99.86%</td>
+            <td>100.00%</td>
+        </tr>
+        <tr>
+            <td>测试集</td>
+            <td>94.00%</td>
+            <td>37.70%</td>
+            <td>44.10%</td>
+        </tr>
+        <tr>
+            <td rowspan="2">高斯核</td>
+            <td>训练集</td>
+            <td><b>99.68%</b></td>
+            <td>99.14%</td>
+            <td><b>94.54%</b></td>
+        </tr>
+        <tr>
+            <td>测试集</td>
+            <td><b>94.80%</b></td>
+            <td>34.10%</td>
+            <td><b>47.00%</b></td>
+        </tr>
+        <tr>
+            <td rowspan="2">Sigmoid核</td>
+            <td>训练集</td>
+            <td>95.42%</td>
+            <td>7.96%</td>
+            <td>59.82%</td>
+        </tr>
+        <tr>
+            <td>测试集</td>
+            <td>92.10%</td>
+            <td>7.40%</td>
+            <td>44.70%</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>此外，我们对模型的收敛性和各个核函数的参数选择进行了测试，模型精度与迭代次数的关系如下图所示</p>
+<p><img src="/images/support-vector-machine/convergence.png" style="zoom: 75%;" /></p>
+<p>线性核分类精度与 $C$ 和 $\varepsilon$ 的关系如下图所示</p>
+<p><img src="/images/support-vector-machine/linear.png" style="zoom: 75%;" /></p>
+<p>多项式核分类精度与 $\gamma$ 和 $d$ 的关系如下图所示</p>
+<p><img src="/images/support-vector-machine/polynomial.png" style="zoom: 75%;" /></p>
+<p>高斯核分类精度与 $C$ 和 $\gamma$ 的关系如下图所示</p>
+<p><img src="/images/support-vector-machine/gaussian.png" style="zoom: 75%;" /></p>
+<p>Sigmoid核分类精度与 $\gamma$ 和 $r$ 的关系如下图所示</p>
+<p><img src="/images/support-vector-machine/sigmoid.png" style="zoom: 75%;" /></p>
+<p>上述结果揭示了各个参数对模型性能的影响，可以为调参提供一定的指导作用</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>SVM从过去的炙手可热到如今的日薄西山，仅仅过去了十年的时间，无论是精度还是效率，SVM都完败于当下随处可见的神经网络，关于从零开始实现SVM的意义，我也感到迷茫，但这一过程或多或少改变了我对机器学习的认知，一个简洁优雅的多项式时间精确算法，也许只能满足理论研究者的洁癖，而优化复杂模型的近似算法，在工程上赢得了未来。作为一门课程的大作业，笔者的实现难免存在疏漏和不足，希望读者谅解</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%B0%E5%BD%95/" rel="tag"># 记录</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/03/18/acmoj-1125/" rel="prev" title="【题解】ACMOJ 1125 合并优先队列">
+      <i class="fa fa-chevron-left"></i> 【题解】ACMOJ 1125 合并优先队列
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC"><span class="nav-number">2.</span> <span class="nav-text">数学推导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%BD%A2%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">基本形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%87%BD%E6%95%B0%E4%B8%8E%E6%A0%B8%E6%8A%80%E5%B7%A7"><span class="nav-number">2.2.</span> <span class="nav-text">核函数与核技巧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Platt-SMO%E7%AE%97%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">Platt-SMO算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%87%BD%E6%95%B0"><span class="nav-number">3.1.</span> <span class="nav-text">核函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA"><span class="nav-number">3.2.</span> <span class="nav-text">支持向量机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%88%86%E7%B1%BB"><span class="nav-number">3.3.</span> <span class="nav-text">多分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">性能测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="xxyQwQ"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">xxyQwQ</p>
+  <div class="site-description" itemprop="description">xxyQwQ的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xxyQwQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xxyQwQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:xxyQwQ@qq.com" title="E-Mail → mailto:xxyQwQ@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/xxythecoder" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;xxythecoder" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/xxyQwQ" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;xxyQwQ" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/xxyQwQ_" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;xxyQwQ_" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-blog"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">personal blog of xxyQwQ</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
