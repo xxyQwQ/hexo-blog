@@ -156,6 +156,116 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2023/07/31/build-linux-terminal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xxyQwQ">
+      <meta itemprop="description" content="xxyQwQ的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxyQwQ">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/07/31/build-linux-terminal/" class="post-title-link" itemprop="url">【文章】快速搭建Linux终端开发环境</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-07-31 15:45:34 / 修改时间：19:34:53" itemprop="dateCreated datePublished" datetime="2023-07-31T15:45:34+08:00">2023-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%AB%A0/" itemprop="url" rel="index"><span itemprop="name">文章</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p><code>VSCode</code>推出<code>Remote SSH</code>插件以后，远程开发变得简单，原生的开发环境大大提高了工作效率，但各种复杂的系统交互仍然需要回归终端。趁着近期有空折腾，笔者搜集各种资料，基于<code>zsh</code>+<code>oh-my-zsh</code>+<code>tmux</code>+<code>oh-my-tmux</code>搭建了一个相对令人满意的终端环境，本文用于整理搭建过程，构建一份搭建指南，以便日后读者参考</p>
+<h2 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h2><ul>
+<li><code>Linux</code>操作系统（笔者使用<code>Ubuntu 20.04</code>，其他版本可能略有差异）</li>
+<li>用户具有<code>sudo</code>权限（安装依赖）</li>
+<li>一些基本的工具（例如<code>curl</code>、<code>git</code>等）</li>
+<li><strong>科学</strong>的网络环境（请自行配置代理工具）</li>
+</ul>
+<h2 id="搭建步骤"><a href="#搭建步骤" class="headerlink" title="搭建步骤"></a>搭建步骤</h2><h3 id="zsh"><a href="#zsh" class="headerlink" title="zsh"></a>zsh</h3><p>使用<code>apt</code>直接安装<code>zsh</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install zsh</span><br></pre></td></tr></table></figure>
+<p>检查<code>zsh</code>可用性</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /etc/shells</span><br><span class="line"><span class="comment"># /etc/shells: valid login shells</span></span><br><span class="line">/usr/bin/zsh</span><br></pre></td></tr></table></figure>
+<h3 id="oh-my-zsh"><a href="#oh-my-zsh" class="headerlink" title="oh-my-zsh"></a>oh-my-zsh</h3><p>使用<code>curl</code>安装<code>oh-my-zsh</code>，这里同样可以使用<code>wget</code>，具体参考<a target="_blank" rel="noopener" href="https://ohmyz.sh/">官网</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span></span><br><span class="line">$ sh -c <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<p>修改默认<code>shell</code>为<code>zsh</code>，然后重新登录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ chsh -s /bin/zsh</span><br></pre></td></tr></table></figure>
+<p>检查默认<code>shell</code>是否已经正确修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="variable">$SHELL</span></span><br><span class="line">/bin/zsh</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong>：如果使用<code>VSCode</code>进行远程开发，需要额外进行以下操作</p>
+<ul>
+<li>在命令面板（<code>Ctrl</code>+<code>Shift</code>+<code>P</code>）中关闭服务器上的<code>vscode-server</code>进程</li>
+<li>进入配置终端设置，将该服务器的默认终端修改为<code>zsh</code></li>
+</ul>
+<p>此处笔者使用<code>agnoster</code>主题，在<code>~/.zshrc</code>中修改配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.zshrc</span><br><span class="line">ZSH_THEME=<span class="string">&quot;agnoster&quot;</span></span><br></pre></td></tr></table></figure>
+<p>从<code>Github</code>安装<code>zsh-autosuggestions</code>和<code>zsh-syntax-highlighting</code>插件，并在<code>~/.zshrc</code>中启用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/zsh-users/zsh-autosuggestions <span class="variable">$ZSH_CUSTOM</span>/plugins/zsh-autosuggestions</span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/zsh-users/zsh-syntax-highlighting.git <span class="variable">$ZSH_CUSTOM</span>/plugins/zsh-syntax-highlighting</span><br><span class="line">$ vim ~/.zshrc</span><br><span class="line">plugins=(git zsh-autosuggestions zsh-syntax-highlighting)</span><br></pre></td></tr></table></figure>
+<h3 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h3><p>使用<code>apt</code>直接安装<code>tmux</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install tmux</span><br></pre></td></tr></table></figure>
+<p>如果系统自带<code>tmux</code>，重启即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ tmux kill-server</span><br></pre></td></tr></table></figure>
+<h3 id="oh-my-tmux"><a href="#oh-my-tmux" class="headerlink" title="oh-my-tmux"></a>oh-my-tmux</h3><p>从<code>Github</code>安装<code>oh-my-tmux</code>，这里笔者使用自己配置的版本，同样可以直接使用<a target="_blank" rel="noopener" href="https://github.com/gpakosz/.tmux">原版</a>，除了下载地址不同以外，安装过程完全相同</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/xxyQwQ/.tmux</span><br><span class="line">$ <span class="built_in">ln</span> -sf .tmux/.tmux.conf</span><br><span class="line">$ <span class="built_in">cp</span> .tmux/.tmux.conf.local .</span><br></pre></td></tr></table></figure>
+<h2 id="其他事项"><a href="#其他事项" class="headerlink" title="其他事项"></a>其他事项</h2><h3 id="迁移bash配置"><a href="#迁移bash配置" class="headerlink" title="迁移bash配置"></a>迁移bash配置</h3><p>如果之前在<code>.bashrc</code>中进行了一些配置，可以将这些内容直接复制到<code>.zshrc</code>中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.zshrc</span><br><span class="line"><span class="comment"># proxy setting</span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/profile.d/clash.sh ]; <span class="keyword">then</span></span><br><span class="line">    . /etc/profile.d/clash.sh</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<h3 id="关于Anaconda"><a href="#关于Anaconda" class="headerlink" title="关于Anaconda"></a>关于Anaconda</h3><p>如果使用<code>Anaconda</code>，建议关闭自动激活，否则在启动<code>tmux</code>时<code>PATH</code>变量可能错误加载，导致虚拟环境无法正常使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.condarc</span><br><span class="line">auto_activate_base: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<h3 id="改进外观"><a href="#改进外观" class="headerlink" title="改进外观"></a>改进外观</h3><p>笔者配置时注意到<code>zsh</code>和<code>tmux</code>中显示的主机名可能很长，可以通过修改配置文件的方式隐藏它们</p>
+<p>对于<code>oh-my-zsh</code>，在<code>agnoster.zsh-theme</code>中做如下修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.oh-my-zsh/themes/agnoster.zsh-theme</span><br><span class="line"><span class="function"><span class="title">prompt_context</span></span>() &#123;</span><br><span class="line">  <span class="keyword">if</span> [[ <span class="string">&quot;<span class="variable">$USERNAME</span>&quot;</span> != <span class="string">&quot;<span class="variable">$DEFAULT_USER</span>&quot;</span> || -n <span class="string">&quot;<span class="variable">$SSH_CLIENT</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">    prompt_segment black default <span class="string">&quot;%(!.%&#123;%F&#123;yellow&#125;%&#125;.)%n&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于<code>oh-my-tmux</code>，在<code>~/.tmux.conf.local</code>中做如下修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.tmux.conf.local</span><br><span class="line">tmux_conf_theme_status_right=<span class="string">&quot; #&#123;prefix&#125;#&#123;mouse&#125;#&#123;pairing&#125;#&#123;synchronized&#125;#&#123;?battery_status,#&#123;battery_status&#125;,&#125;#&#123;?battery_bar, #&#123;battery_bar&#125;,&#125;#&#123;?battery_percentage, #&#123;battery_percentage&#125;,&#125; , %R , %d %b | #&#123;username&#125;#&#123;root&#125; &quot;</span></span><br></pre></td></tr></table></figure>
+<p>至此，终端环境已经搭建完成，效果展示如下</p>
+<p><img src="/images/build-linux-terminal/showcase.png" style="zoom: 50%;" /></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2023/06/20/support-vector-machine/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1109,86 +1219,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2022/10/08/acmoj-1058/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="xxyQwQ">
-      <meta itemprop="description" content="xxyQwQ的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxyQwQ">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/10/08/acmoj-1058/" class="post-title-link" itemprop="url">【题解】ACMOJ 1058 单循环链表</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-10-08 23:04:28 / 修改时间：23:14:34" itemprop="dateCreated datePublished" datetime="2022-10-08T23:04:28+08:00">2022-10-08</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E9%A2%98%E8%A7%A3/" itemprop="url" rel="index"><span itemprop="name">题解</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p><a target="_blank" rel="noopener" href="https://acm.sjtu.edu.cn/OnlineJudge/problem?problem_id=1058">ACMOJ - 1058 - 单循环链表</a></p>
-<p>按模板代码实现单循环链表，支持如下操作：</p>
-<ol>
-<li>返回链表长度</li>
-<li>在位置 $i$ 插入一个数</li>
-<li>输出位置 $i$ 的数</li>
-<li>删除位置 $i$ 的数</li>
-<li>删除位置 $i$ 的数并将其插入链表尾端</li>
-<li>输出链表中最大的数</li>
-</ol>
-<p>无复杂度要求，但不允许发生内存泄漏</p>
-<h3 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h3><p>标准的单链表实现，注意动态内存管理即可</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>此处给出核心部分代码实现</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> LIST</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">NODE</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> data;</span><br><span class="line">        NODE *next;</span><br><span class="line">        <span class="built_in">NODE</span>() : <span class="built_in">next</span>(<span class="literal">nullptr</span>) &#123;&#125;</span><br><span class="line">        <span class="built_in">NODE</span>(<span class="type">int</span> d, NODE *n = <span class="literal">nullptr</span>) : <span class="built_in">data</span>(d), <span class="built_in">next</span>(n) &#123;&#125;</span><br><span class="line">        ~<span class="built_in">NODE</span>() &#123;&#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    NODE *head = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="type">int</span> len = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        len = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">NODE *<span class="title">move</span><span class="params">(<span class="type">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        NODE *p = head;</span><br><span class="line">        <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>)</span><br><span class="line">            p = p-&gt;next;</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insert</span><span class="params">(<span class="type">int</span> i, <span class="type">int</span> x)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(len - <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">if</span> (len == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                head = <span class="keyword">new</span> <span class="built_in">NODE</span>(x);</span><br><span class="line">                head-&gt;next = head;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                head = p-&gt;next = <span class="keyword">new</span> <span class="built_in">NODE</span>(x, head);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(i - <span class="number">1</span>);</span><br><span class="line">            p-&gt;next = <span class="keyword">new</span> <span class="built_in">NODE</span>(x, p-&gt;next);</span><br><span class="line">        &#125;</span><br><span class="line">        len++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">remove</span><span class="params">(<span class="type">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(len - <span class="number">1</span>), *q = p-&gt;next;</span><br><span class="line">            head = p-&gt;next = q-&gt;next;</span><br><span class="line">            <span class="keyword">delete</span> q;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(i - <span class="number">1</span>), *q = p-&gt;next;</span><br><span class="line">            p-&gt;next = q-&gt;next;</span><br><span class="line">            <span class="keyword">delete</span> q;</span><br><span class="line">        &#125;</span><br><span class="line">        len--;</span><br><span class="line">        <span class="keyword">if</span> (len == <span class="number">0</span>)</span><br><span class="line">            head-&gt;next = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">remove_insert</span><span class="params">(<span class="type">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">int</span> x;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(len - <span class="number">1</span>), *q = p-&gt;next;</span><br><span class="line">            head = p-&gt;next = q-&gt;next;</span><br><span class="line">            x = q-&gt;data;</span><br><span class="line">            <span class="keyword">delete</span> q;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            NODE *p = <span class="built_in">move</span>(i - <span class="number">1</span>), *q = p-&gt;next;</span><br><span class="line">            p-&gt;next = q-&gt;next;</span><br><span class="line">            x = q-&gt;data;</span><br><span class="line">            <span class="keyword">delete</span> q;</span><br><span class="line">        &#125;</span><br><span class="line">        len--;</span><br><span class="line">        <span class="built_in">insert</span>(len, x);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">get_length</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        cout &lt;&lt; len &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">query</span><span class="params">(<span class="type">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i &lt; <span class="number">0</span> || i &gt;= len)</span><br><span class="line">        &#123;</span><br><span class="line">            cout &lt;&lt; <span class="number">-1</span> &lt;&lt; endl;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">move</span>(i)-&gt;data &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">get_max</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        NODE *p = head;</span><br><span class="line">        <span class="type">int</span> k = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (p-&gt;data &gt; k)</span><br><span class="line">                k = p-&gt;data;</span><br><span class="line">            p = p-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; k &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">clear</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        NODE *p = head, *q;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            q = p-&gt;next;</span><br><span class="line">            <span class="keyword">delete</span> p;</span><br><span class="line">            p = q;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1259,7 +1289,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
