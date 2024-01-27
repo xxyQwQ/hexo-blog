@@ -156,6 +156,104 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2024/01/27/build-windows-terminal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xxyQwQ">
+      <meta itemprop="description" content="xxyQwQ的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxyQwQ">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/01/27/build-windows-terminal/" class="post-title-link" itemprop="url">【文章】快速搭建Windows终端开发环境</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-01-27 10:43:22 / 修改时间：10:59:31" itemprop="dateCreated datePublished" datetime="2024-01-27T10:43:22+08:00">2024-01-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%AB%A0/" itemprop="url" rel="index"><span itemprop="name">文章</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="安装应用"><a href="#安装应用" class="headerlink" title="安装应用"></a>安装应用</h2><p>Windows 11 自带 Windows Terminal，如果使用 Windows 10 需要先在 Microsoft Store 手动安装</p>
+<p>最新版本的 oh-my-posh 也可以直接通过 Microsoft Store 安装，注意下载可能需要代理</p>
+<h2 id="配置字体"><a href="#配置字体" class="headerlink" title="配置字体"></a>配置字体</h2><p>我们首先需要安装 <a target="_blank" rel="noopener" href="https://github.com/ryanoasis/nerd-fonts">Nerd Fonts</a> 以确保 oh-my-posh 中的字符和图标能够正常显示</p>
+<p>各种字体可以直接在<a target="_blank" rel="noopener" href="https://www.nerdfonts.com/font-downloads">官网</a>下载，这里我们选用 CaskaydiaCove Nerd Font 作为演示，下载并安装字体后打开 Windows Terminal，在设置中选择 Windows PowerShell 的配置文件，在外观中修改字体并保存即可</p>
+<h2 id="修改执行策略"><a href="#修改执行策略" class="headerlink" title="修改执行策略"></a>修改执行策略</h2><p>此外，我们需要修改 Windows PowerShell 的执行策略，使得 oh-my-posh 能够正确执行，以管理员身份运行 Windows PowerShell 执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ set-ExecutionPolicy RemoteSigned</span><br></pre></td></tr></table></figure>
+<p>然后根据提示，将执行策略修改为是或全是</p>
+<h2 id="创建配置文件"><a href="#创建配置文件" class="headerlink" title="创建配置文件"></a>创建配置文件</h2><p>现在我们为 Windows PowerShell 创建配置文件，在每次启动时都对 oh-my-posh 进行初始化</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ New-Item <span class="variable">$profile</span> -Value <span class="string">&quot;oh-my-posh init pwsh | Invoke-Expression&quot;</span> -Force</span><br></pre></td></tr></table></figure>
+<p>重新打开 Windows Terminal，此时 oh-my-posh 已经可以正常启动</p>
+<h2 id="更改主题"><a href="#更改主题" class="headerlink" title="更改主题"></a>更改主题</h2><p>接下来我们可以按需更换主题，以 Powerlevel10k 的 Rainbow Style 为例，首先执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ Get-PoshThemes</span><br></pre></td></tr></table></figure>
+<p>该命令会列出所有主题及其所在路径，根据提示我们可以定位到 <code>themes</code> 目录，将相应的主题文件复制到用户目录下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ Copy-Item <span class="string">&quot;C:\Users\xxyQwQ\AppData\Local\Programs\oh-my-posh\themes\powerlevel10k_rainbow.omp.json&quot;</span> -Destination <span class="string">&quot;C:\Users\xxyQwQ&quot;</span> -Force</span><br></pre></td></tr></table></figure>
+<p>根据提示修改创建的配置文件，在启动时加载主题</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ code <span class="variable">$profile</span></span><br><span class="line">oh-my-posh init pwsh --config <span class="string">&quot;C:\Users\xxyQwQ\powerlevel10k_rainbow.omp.json&quot;</span> | Invoke-Expression</span><br></pre></td></tr></table></figure>
+<p>保存并重启 Windows Terminal，此时主题已经加载成功</p>
+<h2 id="安装模块"><a href="#安装模块" class="headerlink" title="安装模块"></a>安装模块</h2><p>为了获得与 zsh 类似的使用体验，我们还需要额外安装一些模块，以管理员身份运行 Windows PowerShell 执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ Install-Module -Name PackageManagement -Repository PSGallery -Force</span><br><span class="line">$ Install-Module -Name PowerShellGet -Repository PSGallery -Force</span><br></pre></td></tr></table></figure>
+<p>重启 Windows PowerShell，同样以管理员身份执行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ Install-Module -Name PSReadLine -AllowPrerelease -Scope CurrentUser -Force -SkipPublisherCheck</span><br><span class="line">$ Install-Module -Name posh-git -AllowPrerelease -Scope CurrentUser -Force -SkipPublisherCheck</span><br></pre></td></tr></table></figure>
+<p>模块安装完成后，在配置文件中添加如下命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ code <span class="variable">$profile</span></span><br><span class="line">Import-Module posh-git</span><br><span class="line">Import-Module PSReadLine</span><br><span class="line">Set-PSReadLineOption -PredictionSource History</span><br><span class="line">Set-PSReadLineKeyHandler -Chord <span class="string">&quot;Ctrl+RightArrow&quot;</span> -Function ForwardWord</span><br></pre></td></tr></table></figure>
+<p>保存并重启 Windows Terminal，此时模块已经加载成功，此外 oh-my-posh 可以根据输入历史补全命令，使用 Ctrl+RightArrow 可以补全单词</p>
+<h2 id="个性化设置"><a href="#个性化设置" class="headerlink" title="个性化设置"></a>个性化设置</h2><p>此外，我们也可以在配置文件中添加命令以支持更多个性化设置，例如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Set-Alias ll <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+<p>从而使得 oh-my-posh 更加符合 Linux 用户的使用习惯，一个完整的配置文件示例如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ code <span class="variable">$profile</span></span><br><span class="line">oh-my-posh init pwsh --config <span class="string">&quot;C:\Users\xxyQwQ\powerlevel10k_rainbow.omp.json&quot;</span> | Invoke-Expression</span><br><span class="line">Import-Module posh-git</span><br><span class="line">Import-Module PSReadLine</span><br><span class="line">Set-PSReadLineOption -PredictionSource History</span><br><span class="line">Set-PSReadLineKeyHandler -Chord <span class="string">&quot;Ctrl+RightArrow&quot;</span> -Function ForwardWord</span><br><span class="line">Set-Alias ll <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置-VSCode-终端"><a href="#配置-VSCode-终端" class="headerlink" title="配置 VSCode 终端"></a>配置 VSCode 终端</h2><p>最后，我们在 VSCode 中将默认配置文件改为 Windows PowerShell，并将终端字体改为 ‘CaskaydiaCove Nerd Font Mono’</p>
+<p>至此，我们已经可以在 VSCode 中正常使用 oh-my-posh 作为终端</p>
+<p><img src="/images/build-windows-terminal/showcase.png" style="zoom: 50%;" /></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2023/07/31/build-linux-terminal/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -854,10 +952,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-02-02 00:00:07 / 修改时间：00:00:46" itemprop="dateCreated datePublished" datetime="2023-02-02T00:00:07+08:00">2023-02-02</time>
+              <time title="创建时间：2023-02-02 00:00:07" itemprop="dateCreated datePublished" datetime="2023-02-02T00:00:07+08:00">2023-02-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-04 17:19:50" itemprop="dateModified" datetime="2023-08-04T17:19:50+08:00">2023-08-04</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -888,7 +992,7 @@
 <p>纵观整个学期的学习过程，仿佛置身漫长的黑暗隧道，在望不到尽头的恐惧中匍匐前行，又被沉重的枷锁缚住手脚，长期不得挣脱。这种痛苦源于不合理的培养计划和课程设计，作为学生如蝼蚁般无力改变。我凭借着扎实的基础和坚定的毅力最终坚持下来，可那些普通而无助的人又该如何呢？</p>
 <h2 id="考试周"><a href="#考试周" class="headerlink" title="考试周"></a>考试周</h2><p>由于平时巨大的课程难度和任务量，即使临近考试周，大家手头仍有大量作业尚未完成，期末复习更是天方夜谭。得益于尽早完成任务的策略和前几周不懈的努力，我腾出了宝贵的一周提前进行复习。期间，我发现了大量的知识漏洞，并通过反复看书刷题来弥补，这一周的复习对部分课程的成绩至关重要。</p>
 <p>总结来说，这一学期的考试有放水现象，平均分相较往年偏高。我对自己的成绩比较满意，其中大学物理和模拟电子技术的高分算是预料之外，计算机体系结构勉强90分不太满意，一方面是课程设计存在问题，不在本文讨论范围之内，另一方面在复习时忽视了对基本计算题型的训练。考虑到身体健康和时间安排，我申请了信号与系统的缓考，需要在寒假里做相应的复习和练习。</p>
-<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>我在自己2022年度总结的文案里写道：</p>
+<h2 id="年终总结"><a href="#年终总结" class="headerlink" title="年终总结"></a>年终总结</h2><p>我在自己2022年度总结的文案里写道：</p>
 <blockquote>
 <p>过去的一年里，几乎所有的计划都被打乱了，当初信誓旦旦要做的事情，满怀期许想学的知识，都在生活的一团乱麻中抛之脑后。我曾不止一次地想在闲暇之余探索一些专业知识，亦或是出去逛逛，让自己的生活显得不那么无聊，然而现实是极度的忙碌和频繁的封控，以至于热情终于被消磨殆尽。不可否认，这一年对我的影响是极大的，它迫使我不断地观察和思考，潜移默化地重塑着我对世界的理解。闻媛老师的《经济与社会伦理》让我印象深刻，它让我深入地思考社会运作的合理性，重新审视那些看似理所应当的认知，建立稳定的伦理思维。</p>
 </blockquote>
@@ -1149,76 +1253,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xxyqwq.github.io/2022/10/14/acmoj-1080/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="xxyQwQ">
-      <meta itemprop="description" content="xxyQwQ的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxyQwQ">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/10/14/acmoj-1080/" class="post-title-link" itemprop="url">【题解】ACMOJ 1080 后缀表达式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-10-14 17:27:44 / 修改时间：17:32:49" itemprop="dateCreated datePublished" datetime="2022-10-14T17:27:44+08:00">2022-10-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E9%A2%98%E8%A7%A3/" itemprop="url" rel="index"><span itemprop="name">题解</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p><a target="_blank" rel="noopener" href="https://acm.sjtu.edu.cn/OnlineJudge/problem?problem_id=1080">ACMOJ - 1080 - 后缀表达式</a></p>
-<p>计算给定后缀表达式的值，其中<code>@</code>为表达式终止符，<code>.</code>为操作数结束标识</p>
-<h3 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h3><p>按照后缀表达式的规则计算即可，推荐使用字符串进行处理，注意操作数的完整提取</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cctype&gt;</span></span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> NMAX = <span class="number">10005</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> suffix[NMAX];</span><br><span class="line"><span class="type">int</span> stack[NMAX], top = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, suffix);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> p = <span class="number">0</span>; suffix[p] != <span class="string">&#x27;@&#x27;</span>; p++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">isdigit</span>(suffix[p]))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> oprand = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> (suffix[p] != <span class="string">&#x27;.&#x27;</span>)</span><br><span class="line">                oprand = oprand * <span class="number">10</span> + suffix[p] - <span class="string">&#x27;0&#x27;</span>, p++;</span><br><span class="line">            stack[++top] = oprand;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (suffix[p] == <span class="string">&#x27;+&#x27;</span>)</span><br><span class="line">            top--, stack[top] = stack[top] + stack[top + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (suffix[p] == <span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">            top--, stack[top] = stack[top] - stack[top + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (suffix[p] == <span class="string">&#x27;*&#x27;</span>)</span><br><span class="line">            top--, stack[top] = stack[top] * stack[top + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (suffix[p] == <span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">            top--, stack[top] = stack[top] / stack[top + <span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, stack[top]);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1289,7 +1323,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-count">19</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1342,7 +1376,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
     <i class="fa fa-blog"></i>
   </span>
