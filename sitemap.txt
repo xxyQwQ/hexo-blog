@@ -1,7 +1,8 @@
-https://xxyqwq.github.io/2024/01/27/build-windows-terminal/
+https://xxyqwq.github.io/categories/index.html
+https://xxyqwq.github.io/2024/02/14/junior-life/
 https://xxyqwq.github.io/2023/02/02/sophomore-life/
 https://xxyqwq.github.io/about/index.html
-https://xxyqwq.github.io/categories/index.html
+https://xxyqwq.github.io/2024/01/27/build-windows-terminal/
 https://xxyqwq.github.io/2023/07/31/build-linux-terminal/
 https://xxyqwq.github.io/2023/06/20/support-vector-machine/
 https://xxyqwq.github.io/2023/03/18/acmoj-1125/
