@@ -262,10 +262,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-01-27 10:43:22 / 修改时间：11:10:20" itemprop="dateCreated datePublished" datetime="2024-01-27T10:43:22+08:00">2024-01-27</time>
+              <time title="创建时间：2024-01-27 10:43:22" itemprop="dateCreated datePublished" datetime="2024-01-27T10:43:22+08:00">2024-01-27</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-02-18 00:35:58" itemprop="dateModified" datetime="2024-02-18T00:35:58+08:00">2024-02-18</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -304,6 +310,8 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ Copy-Item <span class="string">&quot;C:\Users\xxyQwQ\AppData\Local\Programs\oh-my-posh\themes\powerlevel10k_rainbow.omp.json&quot;</span> -Destination <span class="string">&quot;C:\Users\xxyQwQ&quot;</span> -Force</span><br></pre></td></tr></table></figure>
 <p>根据提示修改创建的配置文件，在启动时加载主题</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ code <span class="variable">$profile</span></span><br><span class="line">oh-my-posh init pwsh --config <span class="string">&quot;C:\Users\xxyQwQ\powerlevel10k_rainbow.omp.json&quot;</span> | Invoke-Expression</span><br></pre></td></tr></table></figure>
+<p>我们可以对主题文件进行定制化修改，例如添加 Anaconda 环境的显示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ code <span class="string">&quot;C:\Users\xxyQwQ\powerlevel10k_rainbow.omp.json&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;background&quot;</span>: <span class="string">&quot;#FFDE57&quot;</span>,</span><br><span class="line">    <span class="string">&quot;foreground&quot;</span>: <span class="string">&quot;#111111&quot;</span>,</span><br><span class="line">    <span class="string">&quot;invert_powerline&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;powerline_symbol&quot;</span>: <span class="string">&quot;\ue0b2&quot;</span>,</span><br><span class="line">    <span class="string">&quot;properties&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;fetch_virtual_env&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">&quot;fetch_version&quot;</span>: <span class="literal">false</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;style&quot;</span>: <span class="string">&quot;powerline&quot;</span>,</span><br><span class="line">    <span class="string">&quot;template&quot;</span>: <span class="string">&quot; &#123;&#123; if .Error &#125;&#125;&#123;&#123; .Error &#125;&#125;&#123;&#123; else &#125;&#125;&#123;&#123; if .Venv &#125;&#125;&#123;&#123; .Venv &#125;&#125;&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125; \ue235 &quot;</span>,</span><br><span class="line">    <span class="string">&quot;type&quot;</span>: <span class="string">&quot;python&quot;</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
 <p>保存并重启 Windows Terminal，此时主题已经加载成功</p>
 <h2 id="安装模块"><a href="#安装模块" class="headerlink" title="安装模块"></a>安装模块</h2><p>为了获得与 zsh 类似的使用体验，我们还需要额外安装一些模块，以管理员身份运行 Windows PowerShell 执行命令</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ Install-Module -Name PackageManagement -Repository PSGallery -Force</span><br><span class="line">$ Install-Module -Name PowerShellGet -Repository PSGallery -Force</span><br></pre></td></tr></table></figure>
