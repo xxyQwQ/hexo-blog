@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>xxyQwQ</title>
+  <title>xxyQwQ&#39;s Blog</title>
   
   
-  <link href="https://xxyqwq.github.io/atom.xml" rel="self"/>
+  <link href="https://blog.xxyqwq.cn/atom.xml" rel="self"/>
   
-  <link href="https://xxyqwq.github.io/"/>
+  <link href="https://blog.xxyqwq.cn/"/>
   <updated>2024-09-15T07:01:03.233Z</updated>
-  <id>https://xxyqwq.github.io/</id>
+  <id>https://blog.xxyqwq.cn/</id>
   
   <author>
     <name>xxyQwQ</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>【文章】我的大三生活</title>
-    <link href="https://xxyqwq.github.io/2024/02/14/junior-life/"/>
-    <id>https://xxyqwq.github.io/2024/02/14/junior-life/</id>
+    <link href="https://blog.xxyqwq.cn/2024/02/14/junior-life/"/>
+    <id>https://blog.xxyqwq.cn/2024/02/14/junior-life/</id>
     <published>2024-02-14T10:43:27.000Z</published>
     <updated>2024-09-15T07:01:03.233Z</updated>
     
@@ -33,17 +33,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="总结" scheme="https://xxyqwq.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    <category term="总结" scheme="https://blog.xxyqwq.cn/tags/%E6%80%BB%E7%BB%93/"/>
     
   </entry>
   
   <entry>
     <title>【文章】快速搭建Windows终端开发环境</title>
-    <link href="https://xxyqwq.github.io/2024/01/27/build-windows-terminal/"/>
-    <id>https://xxyqwq.github.io/2024/01/27/build-windows-terminal/</id>
+    <link href="https://blog.xxyqwq.cn/2024/01/27/build-windows-terminal/"/>
+    <id>https://blog.xxyqwq.cn/2024/01/27/build-windows-terminal/</id>
     <published>2024-01-27T02:43:22.000Z</published>
     <updated>2024-02-17T16:35:58.000Z</updated>
     
@@ -57,17 +57,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="记录" scheme="https://xxyqwq.github.io/tags/%E8%AE%B0%E5%BD%95/"/>
+    <category term="记录" scheme="https://blog.xxyqwq.cn/tags/%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
   <entry>
     <title>【文章】快速搭建Linux终端开发环境</title>
-    <link href="https://xxyqwq.github.io/2023/07/31/build-linux-terminal/"/>
-    <id>https://xxyqwq.github.io/2023/07/31/build-linux-terminal/</id>
+    <link href="https://blog.xxyqwq.cn/2023/07/31/build-linux-terminal/"/>
+    <id>https://blog.xxyqwq.cn/2023/07/31/build-linux-terminal/</id>
     <published>2023-07-31T07:45:34.000Z</published>
     <updated>2023-07-31T11:34:53.000Z</updated>
     
@@ -81,17 +81,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="记录" scheme="https://xxyqwq.github.io/tags/%E8%AE%B0%E5%BD%95/"/>
+    <category term="记录" scheme="https://blog.xxyqwq.cn/tags/%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
   <entry>
     <title>【文章】从零开始实现支持向量机</title>
-    <link href="https://xxyqwq.github.io/2023/06/20/support-vector-machine/"/>
-    <id>https://xxyqwq.github.io/2023/06/20/support-vector-machine/</id>
+    <link href="https://blog.xxyqwq.cn/2023/06/20/support-vector-machine/"/>
+    <id>https://blog.xxyqwq.cn/2023/06/20/support-vector-machine/</id>
     <published>2023-06-20T12:22:29.000Z</published>
     <updated>2023-06-20T16:31:31.000Z</updated>
     
@@ -105,17 +105,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="记录" scheme="https://xxyqwq.github.io/tags/%E8%AE%B0%E5%BD%95/"/>
+    <category term="记录" scheme="https://blog.xxyqwq.cn/tags/%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1125 合并优先队列</title>
-    <link href="https://xxyqwq.github.io/2023/03/18/acmoj-1125/"/>
-    <id>https://xxyqwq.github.io/2023/03/18/acmoj-1125/</id>
+    <link href="https://blog.xxyqwq.cn/2023/03/18/acmoj-1125/"/>
+    <id>https://blog.xxyqwq.cn/2023/03/18/acmoj-1125/</id>
     <published>2023-03-18T14:54:31.000Z</published>
     <updated>2023-03-18T15:10:13.000Z</updated>
     
@@ -129,17 +129,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1049 前序中序求二叉树</title>
-    <link href="https://xxyqwq.github.io/2023/03/18/acmoj-1049/"/>
-    <id>https://xxyqwq.github.io/2023/03/18/acmoj-1049/</id>
+    <link href="https://blog.xxyqwq.cn/2023/03/18/acmoj-1049/"/>
+    <id>https://blog.xxyqwq.cn/2023/03/18/acmoj-1049/</id>
     <published>2023-03-18T14:38:17.000Z</published>
     <updated>2023-03-18T14:52:13.000Z</updated>
     
@@ -153,17 +153,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1216 括号匹配</title>
-    <link href="https://xxyqwq.github.io/2023/03/18/acmoj-1216/"/>
-    <id>https://xxyqwq.github.io/2023/03/18/acmoj-1216/</id>
+    <link href="https://blog.xxyqwq.cn/2023/03/18/acmoj-1216/"/>
+    <id>https://blog.xxyqwq.cn/2023/03/18/acmoj-1216/</id>
     <published>2023-03-18T11:39:21.000Z</published>
     <updated>2023-03-18T12:01:02.000Z</updated>
     
@@ -177,17 +177,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【文章】我的大二生活</title>
-    <link href="https://xxyqwq.github.io/2023/02/02/sophomore-life/"/>
-    <id>https://xxyqwq.github.io/2023/02/02/sophomore-life/</id>
+    <link href="https://blog.xxyqwq.cn/2023/02/02/sophomore-life/"/>
+    <id>https://blog.xxyqwq.cn/2023/02/02/sophomore-life/</id>
     <published>2023-02-01T16:00:07.000Z</published>
     <updated>2024-09-15T07:02:31.476Z</updated>
     
@@ -201,17 +201,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="总结" scheme="https://xxyqwq.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    <category term="总结" scheme="https://blog.xxyqwq.cn/tags/%E6%80%BB%E7%BB%93/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1486 布尔表达式求值</title>
-    <link href="https://xxyqwq.github.io/2022/10/14/acmoj-1486/"/>
-    <id>https://xxyqwq.github.io/2022/10/14/acmoj-1486/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/14/acmoj-1486/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/14/acmoj-1486/</id>
     <published>2022-10-14T11:37:44.000Z</published>
     <updated>2022-10-14T12:01:08.000Z</updated>
     
@@ -225,17 +225,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 14373 循环队列</title>
-    <link href="https://xxyqwq.github.io/2022/10/14/acmoj-14373/"/>
-    <id>https://xxyqwq.github.io/2022/10/14/acmoj-14373/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/14/acmoj-14373/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/14/acmoj-14373/</id>
     <published>2022-10-14T09:33:17.000Z</published>
     <updated>2023-03-18T12:02:24.000Z</updated>
     
@@ -249,17 +249,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 14151 出栈序列</title>
-    <link href="https://xxyqwq.github.io/2022/10/14/acmoj-14151/"/>
-    <id>https://xxyqwq.github.io/2022/10/14/acmoj-14151/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/14/acmoj-14151/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/14/acmoj-14151/</id>
     <published>2022-10-14T09:31:42.000Z</published>
     <updated>2022-10-14T11:59:35.000Z</updated>
     
@@ -273,17 +273,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1080 后缀表达式</title>
-    <link href="https://xxyqwq.github.io/2022/10/14/acmoj-1080/"/>
-    <id>https://xxyqwq.github.io/2022/10/14/acmoj-1080/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/14/acmoj-1080/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/14/acmoj-1080/</id>
     <published>2022-10-14T09:27:44.000Z</published>
     <updated>2022-10-14T09:32:49.000Z</updated>
     
@@ -297,17 +297,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1058 单循环链表</title>
-    <link href="https://xxyqwq.github.io/2022/10/08/acmoj-1058/"/>
-    <id>https://xxyqwq.github.io/2022/10/08/acmoj-1058/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/08/acmoj-1058/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/08/acmoj-1058/</id>
     <published>2022-10-08T15:04:28.000Z</published>
     <updated>2022-10-08T15:14:34.000Z</updated>
     
@@ -321,17 +321,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 11617 字符串相加</title>
-    <link href="https://xxyqwq.github.io/2022/10/08/acmoj-11617/"/>
-    <id>https://xxyqwq.github.io/2022/10/08/acmoj-11617/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/08/acmoj-11617/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/08/acmoj-11617/</id>
     <published>2022-10-08T14:53:28.000Z</published>
     <updated>2022-10-08T15:04:04.000Z</updated>
     
@@ -345,17 +345,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 11038 约瑟夫环</title>
-    <link href="https://xxyqwq.github.io/2022/10/08/acmoj-11038/"/>
-    <id>https://xxyqwq.github.io/2022/10/08/acmoj-11038/</id>
+    <link href="https://blog.xxyqwq.cn/2022/10/08/acmoj-11038/"/>
+    <id>https://blog.xxyqwq.cn/2022/10/08/acmoj-11038/</id>
     <published>2022-10-08T14:02:23.000Z</published>
     <updated>2022-10-08T14:52:43.000Z</updated>
     
@@ -369,17 +369,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1033 求行列式</title>
-    <link href="https://xxyqwq.github.io/2022/09/26/acmoj-1033/"/>
-    <id>https://xxyqwq.github.io/2022/09/26/acmoj-1033/</id>
+    <link href="https://blog.xxyqwq.cn/2022/09/26/acmoj-1033/"/>
+    <id>https://blog.xxyqwq.cn/2022/09/26/acmoj-1033/</id>
     <published>2022-09-26T04:58:19.000Z</published>
     <updated>2022-10-08T13:00:16.000Z</updated>
     
@@ -393,17 +393,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1014 差分序列</title>
-    <link href="https://xxyqwq.github.io/2022/09/25/acmoj-1014/"/>
-    <id>https://xxyqwq.github.io/2022/09/25/acmoj-1014/</id>
+    <link href="https://blog.xxyqwq.cn/2022/09/25/acmoj-1014/"/>
+    <id>https://blog.xxyqwq.cn/2022/09/25/acmoj-1014/</id>
     <published>2022-09-25T14:17:47.000Z</published>
     <updated>2022-09-25T15:02:53.000Z</updated>
     
@@ -417,17 +417,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1572 二分图</title>
-    <link href="https://xxyqwq.github.io/2022/08/30/acmoj-1572/"/>
-    <id>https://xxyqwq.github.io/2022/08/30/acmoj-1572/</id>
+    <link href="https://blog.xxyqwq.cn/2022/08/30/acmoj-1572/"/>
+    <id>https://blog.xxyqwq.cn/2022/08/30/acmoj-1572/</id>
     <published>2022-08-30T07:33:13.000Z</published>
     <updated>2022-08-30T08:31:02.000Z</updated>
     
@@ -441,17 +441,17 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
   <entry>
     <title>【文章】我的大一生活</title>
-    <link href="https://xxyqwq.github.io/2022/08/29/freshman-life/"/>
-    <id>https://xxyqwq.github.io/2022/08/29/freshman-life/</id>
+    <link href="https://blog.xxyqwq.cn/2022/08/29/freshman-life/"/>
+    <id>https://blog.xxyqwq.cn/2022/08/29/freshman-life/</id>
     <published>2022-08-29T11:37:29.000Z</published>
     <updated>2022-08-29T16:14:17.000Z</updated>
     
@@ -466,17 +466,17 @@
     
     
     
-    <category term="文章" scheme="https://xxyqwq.github.io/categories/%E6%96%87%E7%AB%A0/"/>
+    <category term="文章" scheme="https://blog.xxyqwq.cn/categories/%E6%96%87%E7%AB%A0/"/>
     
     
-    <category term="总结" scheme="https://xxyqwq.github.io/tags/%E6%80%BB%E7%BB%93/"/>
+    <category term="总结" scheme="https://blog.xxyqwq.cn/tags/%E6%80%BB%E7%BB%93/"/>
     
   </entry>
   
   <entry>
     <title>【题解】ACMOJ 1485 单调栈</title>
-    <link href="https://xxyqwq.github.io/2022/08/29/acmoj-1485/"/>
-    <id>https://xxyqwq.github.io/2022/08/29/acmoj-1485/</id>
+    <link href="https://blog.xxyqwq.cn/2022/08/29/acmoj-1485/"/>
+    <id>https://blog.xxyqwq.cn/2022/08/29/acmoj-1485/</id>
     <published>2022-08-29T07:41:55.000Z</published>
     <updated>2022-08-29T15:27:02.000Z</updated>
     
@@ -490,10 +490,10 @@
     
     
     
-    <category term="题解" scheme="https://xxyqwq.github.io/categories/%E9%A2%98%E8%A7%A3/"/>
+    <category term="题解" scheme="https://blog.xxyqwq.cn/categories/%E9%A2%98%E8%A7%A3/"/>
     
     
-    <category term="算法" scheme="https://xxyqwq.github.io/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://blog.xxyqwq.cn/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
